@@ -1,0 +1,24 @@
+name: Index CI
+
+# Merging to main is publishing: every FansCut reads index.json from main on its
+# next Discover load. So every change proves itself first:
+#   shape    the entries follow the rules FansCut reads them with
+#   online   each listed repo is public and has fanscut.json at its root
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: index is valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/validate.py --online

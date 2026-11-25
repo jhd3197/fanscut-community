@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/jhd3197/fanscut-community/main/schema/index.schema.json",
+  "title": "FansCut community index",
+  "description": "The cuts FansCut lists on Discover. Each entry links to a public repo that holds the recipe (fanscut.json); the index never holds recipes, media or artwork.",
+  "type": "object",
+  "required": ["schema", "cuts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": 1 },
+    "updated": { "type": "string", "format": "date" },
+    "cuts": {
+      "type": "array",
+      "maxItems": 2000,
+      "items": { "$ref": "#/$defs/cut" }
+    }
+  },
+  "$defs": {
+    "cut": {
+      "type": "object",
+      "required": ["name", "repo", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "repo": {
+          "type": "string",
+          "description": "The cut's public GitHub repo; fanscut.json sits at its root.",
+          "pattern": "^https://github\\.com/[A-Za-z0-9-]+/[A-Za-z0-9._-]+/?$"
+        },
+        "kind": {
+          "enum": ["merge", "supercut", "order", "canon", "character", "chronological", "cut"],
+          "default": "cut"
+        },
+        "category": { "type": "string", "maxLength": 40, "description": "The Discover shelf it goes on, e.g. Fantasy or Anime." },
+        "tagline": { "type": "string", "maxLength": 80 },
+        "poster": { "type": "string", "pattern": "^https://", "description": "Optional poster image (https)." },
+        "variants": { "type": "array", "maxItems": 20, "items": { "type": "string", "maxLength": 60 } },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "description": "What a viewer must own. FansCut compares these with their library before anything is installed.",
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "tmdb": { "type": "integer", "minimum": 1, "description": "A film's TMDB id." },
+        "tvdb": { "type": "integer", "minimum": 1, "description": "A show's TVDB id." },
+        "title": { "type": "string", "maxLength": 200 },
+        "edition": { "type": "string", "maxLength": 50, "description": "e.g. Extended" },
+        "episodes": { "type": "integer", "minimum": 1, "description": "For a show: how many episodes the cut uses." },
+        "optional": { "type": "boolean", "description": "Only some variants need it." }
+      },
+      "oneOf": [
+        { "required": ["tmdb"], "not": { "required": ["tvdb"] } },
+        { "required": ["tvdb"], "not": { "required": ["tmdb"] } }
+      ]
+    }
+  }
+}
